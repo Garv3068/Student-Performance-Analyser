@@ -1,0 +1,18 @@
+<%@ page import="java.util.*, com.studentanalytics.model.*" %>
+<%!
+    /** Escapes user-entered text before it is written into HTML. */
+    private static String esc(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;").replace("<", "&lt;")
+                .replace(">", "&gt;").replace("\"", "&quot;");
+    }
+    private static String pct(double v) {
+        return String.format("%.2f%%", v);
+    }
+    private static String num(double v) {
+        return v == Math.rint(v) ? String.format("%.0f", v) : String.format("%.1f", v);
+    }
+    private static String gradeClass(String g) {
+        return g == null ? "" : "g-" + g.replace("+", "p");
+    }
+%>
