@@ -57,7 +57,6 @@ public class Student implements Serializable {
         }
         return total;
     }
-
     public double getMaxTotalMarks() {
         double max = 0;
         for (Subject s : subjects) {
