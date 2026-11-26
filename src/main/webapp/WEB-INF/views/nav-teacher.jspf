@@ -1,0 +1,10 @@
+<%-- Top navigation for teacher pages. The including page sets: String ctx, String navActive. --%>
+    <nav class="nav" aria-label="Main">
+      <a href="<%= ctx %>/classes"<%= "classes".equals(navActive) ? " aria-current=\"page\"" : "" %>>Sections</a>
+      <a href="<%= ctx %>/students"<%= "report".equals(navActive) ? " aria-current=\"page\"" : "" %>>Class report</a>
+      <a href="<%= ctx %>/students?action=stats"<%= "stats".equals(navActive) ? " aria-current=\"page\"" : "" %>>Subject statistics</a>
+      <a href="<%= ctx %>/students?action=new"<%= "new".equals(navActive) ? " aria-current=\"page\"" : "" %>>Add student</a>
+      <span class="who">Teacher: <%= com.studentanalytics.util.ViewUtil.esc((String) session.getAttribute("authUserName")) %></span>
+      <a href="<%= ctx %>/auth.html#signin" data-switch data-auth="<%= ctx %>/auth">Switch account</a>
+      <a href="<%= ctx %>/" data-signout data-auth="<%= ctx %>/auth">Sign out</a>
+    </nav>
