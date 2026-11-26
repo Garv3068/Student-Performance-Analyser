@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0f1a">
+  <title>Sign in or sign up | Student Performance Analyser</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"><span></span><span></span></div>
+
+  <div class="shell">
+    <!-- Brand panel -->
+    <aside class="art" aria-hidden="true">
+      <a class="brand" href="index.html" tabindex="-1">
+        <span class="brand-mark">A+</span>
+        <span class="brand-name">Student Performance Analyser</span>
+      </a>
+      <div class="art-body">
+        <h2>Marks in. <em>Insight</em> out.</h2>
+        <p>Rankings, grades and subject statistics for your whole class, calculated the moment you save.</p>
+        <div class="mini">
+          <div class="mini-row"><b>1</b><span>Aarav</span><div class="bar"><i style="--w:94%"></i></div><em class="grade">A+</em></div>
+          <div class="mini-row"><b>2</b><span>Meera</span><div class="bar"><i style="--w:86%"></i></div><em class="grade">A</em></div>
+          <div class="mini-row"><b>3</b><span>Kabir</span><div class="bar"><i style="--w:71%"></i></div><em class="grade">B+</em></div>
+        </div>
+      </div>
+      <p class="art-foot">Passwords are salted and hashed. We never store them in plain text.</p>
+    </aside>
+
+    <!-- Form panel -->
+    <main class="pane">
+      <a class="back" href="index.html"><span aria-hidden="true">&larr;</span> Back to home</a>
+
+      <div class="card">
+        <fieldset class="roles" id="roleChooser">
+          <legend>Continue as</legend>
+          <label class="role"><input type="radio" name="role" value="TEACHER" checked>
+            <span><b>Teacher</b><small>Manage sections and students</small></span></label>
+          <label class="role"><input type="radio" name="role" value="STUDENT">
+            <span><b>Student</b><small>View my marks and details</small></span></label>
+        </fieldset>
+
+        <div class="tabs" role="tablist" aria-label="Account">
+          <button type="button" role="tab" id="tabSignin" aria-controls="panelSignin" aria-selected="true">Sign in</button>
+          <button type="button" role="tab" id="tabSignup" aria-controls="panelSignup" aria-selected="false" tabindex="-1">Sign up</button>
+          <span class="tab-ink" aria-hidden="true"></span>
+        </div>
+
+        <!-- Sign in -->
+        <section id="panelSignin" role="tabpanel" aria-labelledby="tabSignin">
+          <h1>Welcome back</h1>
+          <p class="sub" id="siSub">Sign in to manage your sections and students.</p>
+          <form id="formSignin" novalidate>
+            <div class="alert" role="alert" hidden></div>
+
+            <div class="field">
+              <label for="siEmail">Email</label>
+              <input id="siEmail" name="email" type="email" autocomplete="email" inputmode="email" required>
+              <small class="err" id="siEmailErr"></small>
+            </div>
+            <div class="field">
+              <label for="siPassword">Password</label>
+              <div class="pw">
+                <input id="siPassword" name="password" type="password" autocomplete="current-password" required>
+                <button type="button" class="eye" aria-label="Show password" aria-pressed="false">Show</button>
+              </div>
+              <small class="err" id="siPasswordErr"></small>
+            </div>
+
+            <button class="submit" type="submit"><span class="label">Sign in</span><span class="spin" aria-hidden="true"></span></button>
+          </form>
+          <p class="swap">New here? <a href="#signup" data-go="signup">Create an account</a></p>
+        </section>
+
+        <!-- Sign up -->
+        <section id="panelSignup" role="tabpanel" aria-labelledby="tabSignup" hidden>
+          <h1>Create your account</h1>
+          <p class="sub" id="suSub">Free, and it takes under a minute.</p>
+          <form id="formSignup" novalidate>
+            <div class="alert" role="alert" hidden></div>
+
+            <div class="field">
+              <label for="suName">Full name</label>
+              <input id="suName" name="name" type="text" autocomplete="name" maxlength="100" required>
+              <small class="err" id="suNameErr"></small>
+            </div>
+            <div class="field">
+              <label for="suEmail">Email</label>
+              <input id="suEmail" name="email" type="email" autocomplete="email" inputmode="email" required>
+              <small class="hint" id="suEmailHint" hidden>Use the email your teacher registered for you. Your teacher must add you first.</small>
+              <small class="err" id="suEmailErr"></small>
+            </div>
+            <div class="field">
+              <label for="suPassword">Password</label>
+              <div class="pw">
+                <input id="suPassword" name="password" type="password" autocomplete="new-password" aria-describedby="meterText" required>
+                <button type="button" class="eye" aria-label="Show password" aria-pressed="false">Show</button>
+              </div>
+              <div class="meter" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+              <small class="hint" id="meterText">At least 8 characters, with a letter and a number.</small>
+              <small class="err" id="suPasswordErr"></small>
+            </div>
+            <div class="field">
+              <label for="suConfirm">Confirm password</label>
+              <input id="suConfirm" name="confirm" type="password" autocomplete="new-password" required>
+              <small class="err" id="suConfirmErr"></small>
+            </div>
+
+            <button class="submit" type="submit"><span class="label">Create account</span><span class="spin" aria-hidden="true"></span></button>
+          </form>
+          <p class="swap">Already have an account? <a href="#signin" data-go="signin">Sign in</a></p>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/auth.js"></script>
+</body>
+</html>
