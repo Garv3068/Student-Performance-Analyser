@@ -2,9 +2,15 @@
 <%@ page import="java.util.*, com.studentanalytics.model.*, com.studentanalytics.util.ViewUtil" %>
 <%
     String ctx = request.getContextPath();
+    String navActive = "new";
     String error = (String) request.getAttribute("error");
     String idValue = request.getParameter("id");
     String nameValue = request.getParameter("name");
+    String emailValue = request.getParameter("email");
+    @SuppressWarnings("unchecked")
+    List<SchoolClass> sections = (List<SchoolClass>) request.getAttribute("classes");
+    String chosenClass = (String) request.getAttribute("defaultClassId");
+    if (sections == null) sections = new ArrayList<SchoolClass>();
     // Values submitted before an error, so the person does not have to retype them
     String[] subjectNames = request.getParameterValues("subjectName");
     String[] marks = request.getParameterValues("marks");
@@ -23,14 +29,10 @@
 <body>
   <header class="topbar">
     <div>
-      <h1>Student Performance Analyser</h1>
+      <h1><a href="<%= ctx %>/">Student Performance Analyser</a></h1>
       <p>Add a student</p>
     </div>
-    <nav class="nav" aria-label="Main">
-      <a href="<%= ctx %>/students">Class report</a>
-      <a href="<%= ctx %>/students?action=stats">Subject statistics</a>
-      <a href="<%= ctx %>/students?action=new" aria-current="page">Add student</a>
-    </nav>
+    <%@ include file="nav-teacher.jspf" %>
   </header>
 
   <main>
@@ -53,6 +55,25 @@
           <div>
             <label for="name">Student name</label>
             <input id="name" name="name" maxlength="60" required value="<%= ViewUtil.esc(nameValue) %>">
+          </div>
+        </div>
+
+        <div class="field-row two">
+          <div>
+            <label for="email">Student email (optional)</label>
+            <input id="email" name="email" type="email" maxlength="254" autocomplete="off"
+                   value="<%= ViewUtil.esc(emailValue) %>" aria-describedby="emailHelp">
+            <small id="emailHelp" class="meta">Lets the student sign up and see their own marks. Leave blank for no login.</small>
+          </div>
+          <div>
+            <label for="classId">Section</label>
+            <select id="classId" name="classId">
+              <option value="">No section</option>
+              <% for (SchoolClass sc : sections) { %>
+                <option value="<%= sc.getId() %>"<%= String.valueOf(sc.getId()).equals(chosenClass) ? " selected" : "" %>><%= ViewUtil.esc(sc.getName()) %></option>
+              <% } %>
+            </select>
+            <% if (sections.isEmpty()) { %><small class="meta"><a href="<%= ctx %>/classes">Create a section</a> first to assign one.</small><% } %>
           </div>
         </div>
 
@@ -83,5 +104,6 @@
   </main>
 
   <script src="<%= ctx %>/js/app.js"></script>
+  <script src="<%= ctx %>/js/session.js"></script>
 </body>
 </html>
