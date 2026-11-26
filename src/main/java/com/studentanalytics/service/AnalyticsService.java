@@ -51,13 +51,20 @@ public class AnalyticsService {
         if (students == null || students.isEmpty()) {
             return 0;
         }
+        // Students with no subjects have no results yet, so they are left out
+        // instead of being counted as having passed.
+        int graded = 0;
         int passed = 0;
         for (Student s : students) {
+            if (s.getSubjects().isEmpty()) {
+                continue;
+            }
+            graded++;
             if (hasPassedAll(s)) {
                 passed++;
             }
         }
-        return (passed * 100.0) / students.size();
+        return graded == 0 ? 0 : (passed * 100.0) / graded;
     }
 
     public Map<String, SubjectStats> calculateSubjectStats(Collection<Student> students) {
