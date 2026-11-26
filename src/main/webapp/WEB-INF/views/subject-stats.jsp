@@ -2,11 +2,16 @@
 <%@ page import="java.util.*, com.studentanalytics.model.*, com.studentanalytics.util.ViewUtil" %>
 <%
     String ctx = request.getContextPath();
+    String navActive = "stats";
     @SuppressWarnings("unchecked")
     List<SubjectStats> stats = (List<SubjectStats>) request.getAttribute("subjectStats");
     SubjectStats best = (SubjectStats) request.getAttribute("bestSubject");
     SubjectStats weakest = (SubjectStats) request.getAttribute("weakestSubject");
     String message = (String) request.getAttribute("message");
+    @SuppressWarnings("unchecked")
+    List<SchoolClass> sections = (List<SchoolClass>) request.getAttribute("classes");
+    String filterId = (String) request.getAttribute("filterId");
+    if (sections == null) sections = new ArrayList<SchoolClass>();
     if (stats == null) stats = new ArrayList<SubjectStats>();
 %>
 <!DOCTYPE html>
@@ -22,19 +27,25 @@
 <body>
   <header class="topbar">
     <div>
-      <h1>Student Performance Analyser</h1>
+      <h1><a href="<%= ctx %>/">Student Performance Analyser</a></h1>
       <p>Subject-wise statistics</p>
     </div>
-    <nav class="nav" aria-label="Main">
-      <a href="<%= ctx %>/students">Class report</a>
-      <a href="<%= ctx %>/students?action=stats" aria-current="page">Subject statistics</a>
-      <a href="<%= ctx %>/students?action=new">Add student</a>
-    </nav>
+    <%@ include file="nav-teacher.jspf" %>
   </header>
 
   <main>
     <% if (message != null) { %>
       <div class="alert ok" role="status"><%= ViewUtil.esc(message) %></div>
+    <% } %>
+
+    <% if (!sections.isEmpty() || filterId != null) { %>
+      <nav class="chips no-print" aria-label="Filter by section">
+        <a class="chip" href="<%= ctx %>/students?action=stats"<%= filterId == null ? " aria-current=\"true\"" : "" %>>All students</a>
+        <% for (SchoolClass sc : sections) { %>
+          <a class="chip" href="<%= ctx %>/students?action=stats&amp;classId=<%= sc.getId() %>"<%= String.valueOf(sc.getId()).equals(filterId) ? " aria-current=\"true\"" : "" %>><%= ViewUtil.esc(sc.getName()) %></a>
+        <% } %>
+        <a class="chip" href="<%= ctx %>/students?action=stats&amp;classId=none"<%= "none".equals(filterId) ? " aria-current=\"true\"" : "" %>>Unassigned</a>
+      </nav>
     <% } %>
 
     <% if (stats.isEmpty()) { %>
@@ -96,5 +107,6 @@
       </section>
     <% } %>
   </main>
+  <script src="<%= ctx %>/js/session.js"></script>
 </body>
 </html>
