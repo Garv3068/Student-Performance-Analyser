@@ -2,11 +2,15 @@
 <%@ page import="java.util.*, com.studentanalytics.model.*, com.studentanalytics.util.ViewUtil" %>
 <%
     String ctx = request.getContextPath();
+    String navActive = "report";
     Student student = (Student) request.getAttribute("student");
     Subject highest = (Subject) request.getAttribute("highestSubject");
     Subject lowest = (Subject) request.getAttribute("lowestSubject");
     Integer classSize = (Integer) request.getAttribute("classSize");
     String message = (String) request.getAttribute("message");
+    @SuppressWarnings("unchecked")
+    List<SchoolClass> sections = (List<SchoolClass>) request.getAttribute("classes");
+    if (sections == null) sections = new ArrayList<SchoolClass>();
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,14 +25,10 @@
 <body>
   <header class="topbar">
     <div>
-      <h1>Student Performance Analyser</h1>
+      <h1><a href="<%= ctx %>/">Student Performance Analyser</a></h1>
       <p>Student details</p>
     </div>
-    <nav class="nav" aria-label="Main">
-      <a href="<%= ctx %>/students">Class report</a>
-      <a href="<%= ctx %>/students?action=stats">Subject statistics</a>
-      <a href="<%= ctx %>/students?action=new">Add student</a>
-    </nav>
+    <%@ include file="nav-teacher.jspf" %>
   </header>
 
   <main>
@@ -41,6 +41,8 @@
         <div>
           <h2 id="studentName"><%= ViewUtil.esc(student.getName()) %></h2>
           <p class="meta">ID <%= ViewUtil.esc(student.getId()) %>
+            &middot; <%= student.getClassName() == null ? "No section" : "Section " + ViewUtil.esc(student.getClassName()) %>
+            <% if (student.getEmail() != null) { %> &middot; <%= ViewUtil.esc(student.getEmail()) %><% } %>
             <% if (classSize != null) { %> &middot; Rank <%= student.getRank() %> of <%= classSize %><% } %></p>
         </div>
         <% if (!student.getSubjects().isEmpty()) { %>
@@ -82,22 +84,70 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Subject</th><th class="num">Marks</th><th class="num">Out of</th><th class="num">Percentage</th><th>Result</th></tr>
+              <tr><th>Subject</th><th class="num">Marks</th><th class="num">Out of</th><th class="num">Percentage</th><th>Result</th><th>Edit</th></tr>
             </thead>
             <tbody>
-              <% for (Subject sub : student.getSubjects()) { %>
+              <% int rowNo = 0; for (Subject sub : student.getSubjects()) { rowNo++; %>
                 <tr>
-                  <td><%= ViewUtil.esc(sub.getName()) %></td>
-                  <td class="num"><%= ViewUtil.num(sub.getMarksObtained()) %></td>
-                  <td class="num"><%= ViewUtil.num(sub.getMaxMarks()) %></td>
+                  <td>
+                    <%= ViewUtil.esc(sub.getName()) %>
+                    <form id="upd<%= rowNo %>" method="post" action="<%= ctx %>/students">
+                      <input type="hidden" name="action" value="updateSubject">
+                      <input type="hidden" name="id" value="<%= ViewUtil.esc(student.getId()) %>">
+                      <input type="hidden" name="subjectName" value="<%= ViewUtil.esc(sub.getName()) %>">
+                    </form>
+                  </td>
+                  <td class="num"><input form="upd<%= rowNo %>" name="marks" type="number" min="0" step="0.5" required
+                        value="<%= ViewUtil.num(sub.getMarksObtained()) %>" aria-label="Marks for <%= ViewUtil.esc(sub.getName()) %>" style="width:6rem"></td>
+                  <td class="num"><input form="upd<%= rowNo %>" name="maxMarks" type="number" min="1" step="0.5" required
+                        value="<%= ViewUtil.num(sub.getMaxMarks()) %>" aria-label="Maximum marks for <%= ViewUtil.esc(sub.getName()) %>" style="width:6rem"></td>
                   <td class="num <%= sub.isPassed() ? "" : "low" %>"><%= ViewUtil.pct(sub.getPercentage()) %></td>
                   <td><span class="<%= sub.isPassed() ? "status-pass" : "status-fail" %>"><%= sub.isPassed() ? "Pass" : "Fail" %></span></td>
+                  <td>
+                    <div class="row-actions">
+                      <button type="submit" form="upd<%= rowNo %>" class="btn small">Save</button>
+                      <form class="inline-form" method="post" action="<%= ctx %>/students"
+                            onsubmit="return confirm('Remove <%= ViewUtil.esc(sub.getName()).replace("'", "\\'") %>?');">
+                        <input type="hidden" name="action" value="deleteSubject">
+                        <input type="hidden" name="id" value="<%= ViewUtil.esc(student.getId()) %>">
+                        <input type="hidden" name="subjectName" value="<%= ViewUtil.esc(sub.getName()) %>">
+                        <button type="submit" class="btn small danger">Remove</button>
+                      </form>
+                    </div>
+                  </td>
                 </tr>
               <% } %>
             </tbody>
           </table>
         </div>
       <% } %>
+    </section>
+
+    <section class="sheet" aria-labelledby="detailsTitle">
+      <h2 id="detailsTitle">Edit student details</h2>
+      <form method="post" action="<%= ctx %>/students" class="field-row details">
+        <input type="hidden" name="action" value="updateDetails">
+        <input type="hidden" name="id" value="<%= ViewUtil.esc(student.getId()) %>">
+        <div>
+          <label for="studentNameInput">Name</label>
+          <input id="studentNameInput" name="name" maxlength="60" required value="<%= ViewUtil.esc(student.getName()) %>">
+        </div>
+        <div>
+          <label for="studentEmailInput">Email</label>
+          <input id="studentEmailInput" name="email" type="email" maxlength="254" autocomplete="off"
+                 value="<%= ViewUtil.esc(student.getEmail()) %>">
+        </div>
+        <div>
+          <label for="studentClassInput">Section</label>
+          <select id="studentClassInput" name="classId">
+            <option value="">No section</option>
+            <% for (SchoolClass sc : sections) { %>
+              <option value="<%= sc.getId() %>"<%= student.getClassId() != null && student.getClassId() == sc.getId() ? " selected" : "" %>><%= ViewUtil.esc(sc.getName()) %></option>
+            <% } %>
+          </select>
+        </div>
+        <button type="submit" class="btn">Save details</button>
+      </form>
     </section>
 
     <section class="sheet" aria-labelledby="addSubjTitle">
@@ -131,5 +181,6 @@
       </form>
     </div>
   </main>
+  <script src="<%= ctx %>/js/session.js"></script>
 </body>
 </html>
