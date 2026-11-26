@@ -53,8 +53,31 @@
     });
   });
 
-  // Live snapshot: read the summary cards from the class report page.
-  // If the server is not reachable (e.g. file opened directly) the dashes stay.
+  // ---------- Account state: swap guest / signed-in bits of the page ----------
+  function render(user) {
+    document.querySelectorAll('[data-guest]').forEach(function (el) { el.hidden = !!user; });
+    document.querySelectorAll('[data-user]').forEach(function (el) { el.hidden = !user; });
+    if (user) {
+      // Send each role to its own home: teachers to their sections, students to their marks.
+      document.querySelectorAll('a[data-dash]').forEach(function (a) { a.setAttribute('href', user.redirect || 'classes'); });
+      document.querySelectorAll('[data-teacher-only]').forEach(function (el) { el.hidden = user.role === 'STUDENT'; });
+      var first = (user.name || '').split(' ')[0] || 'there';
+      document.querySelectorAll('[data-name]').forEach(function (el) { el.textContent = first; });
+    }
+  }
+
+  document.querySelectorAll('[data-signout]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      fetch('auth', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'action=signout'
+      }).then(function () { window.location.reload(); });
+    });
+  });
+
+  // ---------- Live snapshot: read the summary cards from the class report page ----------
   function setLive(key, text) {
     var el = document.querySelector('[data-live="' + key + '"]');
     if (el) el.textContent = text;
@@ -71,20 +94,30 @@
       if (p < 1) requestAnimationFrame(step);
     })(performance.now());
   }
+  function loadSnapshot() {
+    fetch('students', { credentials: 'same-origin' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function (html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var found = {};
+        doc.querySelectorAll('.summary .stat').forEach(function (s) {
+          var label = s.querySelector('.label'), value = s.querySelector('.value');
+          if (label && value) found[label.textContent.trim()] = value.textContent.trim();
+        });
+        if (found['Students'] === undefined) return;   // not the report page: keep the dashes
+        countUp(document.querySelector('[data-live="students"]'), parseInt(found['Students'], 10));
+        setLive('average', found['Class average'] || '\u2014');
+        setLive('pass', found['Passing every subject'] || '\u2014');
+      })
+      .catch(function () { /* keep the dashes */ });
+  }
 
-  fetch('students', { credentials: 'same-origin' })
-    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
-    .then(function (html) {
-      var doc = new DOMParser().parseFromString(html, 'text/html');
-      var found = {};
-      doc.querySelectorAll('.summary .stat').forEach(function (s) {
-        var label = s.querySelector('.label'), value = s.querySelector('.value');
-        if (label && value) found[label.textContent.trim()] = value.textContent.trim();
-      });
-      var count = found['Students'] !== undefined ? parseInt(found['Students'], 10) : 0;
-      countUp(document.querySelector('[data-live="students"]'), count);
-      setLive('average', found['Class average'] || '\u2014');
-      setLive('pass', found['Passing every subject'] || '\u2014');
+  // Ask the server who is signed in. If it cannot be reached (page opened as a file)
+  // the page simply stays in its signed-out state.
+  fetch('auth?action=session', { credentials: 'same-origin' })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (d) {
+      if (d.authenticated) { render(d); if (d.role !== 'STUDENT') loadSnapshot(); } else { render(null); }
     })
-    .catch(function () { /* keep the dashes */ });
+    .catch(function () { render(null); });
 })();
