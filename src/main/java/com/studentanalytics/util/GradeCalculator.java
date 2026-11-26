@@ -13,9 +13,9 @@ public class GradeCalculator {
             throw new IllegalArgumentException(
                     "Percentage must be between 0 and 100, got " + percentage);
         }
-        if (percentage > 80) return "O";
-        if (percentage > 70) return "A+";
-        if (percentage > 60) return "A";
+        if (percentage >= 80) return "O";
+        if (percentage >= 70) return "A+";
+        if (percentage >= 60) return "A";
         if (percentage >= 50) return "B+";
         if (percentage >= 40) return "B";
         if (percentage >= 30) return "C";
