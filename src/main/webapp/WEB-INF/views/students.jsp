@@ -2,6 +2,7 @@
 <%@ page import="java.util.*, com.studentanalytics.model.*, com.studentanalytics.util.ViewUtil" %>
 <%
     String ctx = request.getContextPath();
+    String navActive = "report";
     @SuppressWarnings("unchecked")
     List<Student> students = (List<Student>) request.getAttribute("students");
     @SuppressWarnings("unchecked")
@@ -10,6 +11,13 @@
     Double classAverage = (Double) request.getAttribute("classAverage");
     Double passPercentage = (Double) request.getAttribute("passPercentage");
     String message = (String) request.getAttribute("message");
+    @SuppressWarnings("unchecked")
+    List<SchoolClass> sections = (List<SchoolClass>) request.getAttribute("classes");
+    String filterLabel = (String) request.getAttribute("filterLabel");
+    String filterId = (String) request.getAttribute("filterId");
+    String addHref = ctx + "/students?action=new"
+            + (filterId != null && !"none".equals(filterId) ? "&classId=" + filterId : "");
+    if (sections == null) sections = new ArrayList<SchoolClass>();
     if (students == null) students = new ArrayList<Student>();
     if (toppers == null) toppers = new ArrayList<Student>();
 %>
@@ -26,14 +34,10 @@
 <body>
   <header class="topbar">
     <div>
-      <h1>Student Performance Analyser</h1>
-      <p>Class report and rankings</p>
+      <h1><a href="<%= ctx %>/">Student Performance Analyser</a></h1>
+      <p><%= filterLabel == null ? "Class report and rankings" : ViewUtil.esc(filterLabel) + " &middot; report and rankings" %></p>
     </div>
-    <nav class="nav" aria-label="Main">
-      <a href="<%= ctx %>/students" aria-current="page">Class report</a>
-      <a href="<%= ctx %>/students?action=stats">Subject statistics</a>
-      <a href="<%= ctx %>/students?action=new">Add student</a>
-    </nav>
+    <%@ include file="nav-teacher.jspf" %>
   </header>
 
   <main>
@@ -41,12 +45,23 @@
       <div class="alert ok" role="status"><%= ViewUtil.esc(message) %></div>
     <% } %>
 
+    <% if (!sections.isEmpty() || filterId != null) { %>
+      <nav class="chips no-print" aria-label="Filter by section">
+        <a class="chip" href="<%= ctx %>/students"<%= filterId == null ? " aria-current=\"true\"" : "" %>>All students</a>
+        <% for (SchoolClass sc : sections) { %>
+          <a class="chip" href="<%= ctx %>/students?classId=<%= sc.getId() %>"<%= String.valueOf(sc.getId()).equals(filterId) ? " aria-current=\"true\"" : "" %>><%= ViewUtil.esc(sc.getName()) %> <small><%= sc.getStudentCount() %></small></a>
+        <% } %>
+        <a class="chip" href="<%= ctx %>/students?classId=none"<%= "none".equals(filterId) ? " aria-current=\"true\"" : "" %>>Unassigned</a>
+        <a class="chip" href="<%= ctx %>/classes">Manage sections</a>
+      </nav>
+    <% } %>
+
     <% if (students.isEmpty()) { %>
       <section class="sheet">
-        <h2>No students yet</h2>
+        <h2><%= filterLabel == null ? "No students yet" : "No students in this view" %></h2>
         <p class="empty">Add a student with marks in each subject to see rankings and class statistics.</p>
         <div class="actions">
-          <a class="btn" href="<%= ctx %>/students?action=new">Add the first student</a>
+          <a class="btn" href="<%= addHref %>">Add the first student</a>
         </div>
       </section>
     <% } else { %>
@@ -81,14 +96,14 @@
       </div>
 
       <section class="sheet" aria-labelledby="rankTitle">
-        <h2 id="rankTitle">Student rankings</h2>
+        <h2 id="rankTitle">Student rankings<%= filterLabel == null ? "" : " &middot; " + ViewUtil.esc(filterLabel) %></h2>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Rank</th><th>ID</th><th>Name</th>
+                <th>Rank</th><th>ID</th><th>Name</th><th>Section</th>
                 <th class="num">Total</th><th class="num">Percentage</th><th></th>
-                <th>Grade</th><th></th>
+                <th>Grade</th><th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -97,17 +112,21 @@
                   <td class="rank"><%= s.getRank() %></td>
                   <td><%= ViewUtil.esc(s.getId()) %></td>
                   <td><a href="<%= ctx %>/students?action=view&amp;id=<%= java.net.URLEncoder.encode(s.getId(), "UTF-8") %>"><%= ViewUtil.esc(s.getName()) %></a></td>
+                  <td><%= s.getClassName() == null ? "-" : ViewUtil.esc(s.getClassName()) %></td>
                   <td class="num"><%= ViewUtil.num(s.getTotalMarks()) %> / <%= ViewUtil.num(s.getMaxTotalMarks()) %></td>
                   <td class="num"><%= ViewUtil.pct(s.getPercentage()) %></td>
                   <td><div class="bar" aria-hidden="true"><span style="width:<%= String.format("%.0f", Math.min(100, s.getPercentage())) %>%"></span></div></td>
                   <td><% if (s.getSubjects().isEmpty()) { %>-<% } else { %><span class="grade <%= ViewUtil.gradeClass(s.getGrade()) %>"><%= ViewUtil.esc(s.getGrade()) %></span><% } %></td>
                   <td>
+                    <div class="row-actions no-print">
+                    <a class="btn small" href="<%= ctx %>/students?action=view&amp;id=<%= java.net.URLEncoder.encode(s.getId(), "UTF-8") %>">Edit</a>
                     <form class="inline-form no-print" method="post" action="<%= ctx %>/students"
                           onsubmit="return confirm('Remove <%= ViewUtil.esc(s.getName()).replace("'", "\\'") %>?');">
                       <input type="hidden" name="action" value="delete">
                       <input type="hidden" name="id" value="<%= ViewUtil.esc(s.getId()) %>">
                       <button type="submit" class="btn small danger">Remove</button>
                     </form>
+                    </div>
                   </td>
                 </tr>
               <% } %>
@@ -115,11 +134,12 @@
           </table>
         </div>
         <div class="actions no-print">
-          <a class="btn" href="<%= ctx %>/students?action=new">Add student</a>
+          <a class="btn" href="<%= addHref %>">Add student</a>
           <button type="button" class="btn secondary" onclick="window.print()">Print report</button>
         </div>
       </section>
     <% } %>
   </main>
+  <script src="<%= ctx %>/js/session.js"></script>
 </body>
 </html>
