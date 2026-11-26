@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b0f1a">
+  <meta name="description" content="Rank your class, spot the strongest and weakest subjects and see who needs help, all from one simple dashboard.">
   <title>Student Performance Analyser</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +14,6 @@
 <body id="top">
   <div class="bg-glow" aria-hidden="true"><span></span><span></span></div>
 
-  <!-- Transparent navigation bar -->
   <header class="nav" id="nav">
     <a class="brand" href="#top" aria-label="Student Performance Analyser, home">
       <span class="brand-mark" aria-hidden="true">A+</span>
@@ -23,9 +23,19 @@
       <span></span><span></span><span></span>
     </button>
     <nav class="nav-links" id="navLinks" aria-label="Main">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
       <a href="students">Class report</a>
-      <a href="students?action=stats">Subject statistics</a>
-      <a href="students?action=new" class="nav-cta">Add student</a>
+
+      <span class="nav-auth" data-guest>
+        <a href="auth.html#signin">Sign in</a>
+        <a href="auth.html#signup" class="nav-primary">Sign up</a>
+      </span>
+      <span class="nav-auth" data-user hidden>
+        <span class="who">Hi, <b data-name>there</b></span>
+        <a href="classes" class="nav-primary" data-dash>Dashboard</a>
+        <a href="#" data-signout>Sign out</a>
+      </span>
     </nav>
   </header>
 
@@ -33,12 +43,17 @@
     <!-- Hero -->
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">Java &middot; Servlets &middot; JSP</p>
+        <p class="eyebrow">Java &middot; Servlets &middot; JSP &middot; MySQL</p>
         <h1>Turn raw marks into <em>clear insight</em>.</h1>
-        <p class="lead">Rank your class, spot the strongest and weakest subjects, and see who needs help, all from one simple dashboard.</p>
-        <div class="cta-row">
-          <a class="btn primary" href="students">Open class report</a>
-          <a class="btn ghost" href="students?action=new">Add a student</a>
+        <p class="lead">Rank your class, spot the strongest and weakest subjects, and see who needs help before exam day. One simple dashboard, zero spreadsheets.</p>
+
+        <div class="cta-row" data-guest>
+          <a class="btn primary" href="auth.html#signup">Get started free</a>
+          <a class="btn ghost" href="auth.html#signin">Sign in</a>
+        </div>
+        <div class="cta-row" data-user hidden>
+          <a class="btn primary" href="classes" data-dash>Open my dashboard</a>
+          <a class="btn ghost" href="students?action=new" data-teacher-only>Add a student</a>
         </div>
 
         <dl class="live" aria-label="Live class snapshot">
@@ -46,9 +61,9 @@
           <div><dt>Class average</dt><dd data-live="average">&mdash;</dd></div>
           <div><dt>Passing every subject</dt><dd data-live="pass">&mdash;</dd></div>
         </dl>
+        <p class="live-note" data-guest>Sign in to see your class&rsquo;s live numbers here.</p>
       </div>
 
-      <!-- Decorative sample report card -->
       <div class="hero-visual" aria-hidden="true">
         <div class="report">
           <div class="report-head">
@@ -63,39 +78,39 @@
             <li><b>5</b><span>Rohan</span><div class="bar"><i data-w="31"></i></div><em class="grade fail">F</em></li>
           </ul>
         </div>
-        <div class="chip chip-a"><small>Strongest subject</small><strong>Mathematics</strong></div>
+        <div class="chip chip-a"><small>Strongest subject</small><strong>Java</strong></div>
         <div class="chip chip-b"><small>Class average</small><strong>68.0%</strong></div>
       </div>
     </section>
 
-    <!-- Feature cards that mirror the three nav items -->
+    <!-- Subject ticker -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track">
+        <span>Mathematics</span><span>Science</span><span>English</span><span>Computer Science</span><span>History</span><span>Geography</span><span>Physics</span><span>Chemistry</span>
+        <span>Mathematics</span><span>Science</span><span>English</span><span>Computer Science</span><span>History</span><span>Geography</span><span>Physics</span><span>Chemistry</span>
+      </div>
+    </div>
+
+    <!-- Features -->
     <section class="section" id="features" aria-labelledby="featTitle">
       <h2 id="featTitle" class="reveal">Everything in one place</h2>
       <p class="section-lead reveal">Three simple tools, one click away.</p>
 
       <div class="cards">
         <a class="card reveal" href="students">
-          <span class="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M4 20V10m6 10V4m6 16v-7m4 7H2"/></svg>
-          </span>
+          <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V10m6 10V4m6 16v-7m4 7H2"/></svg></span>
           <h3>Class report</h3>
           <p>Rankings, totals, percentages and circled red-pen grades for every student.</p>
           <span class="more">Open report <i aria-hidden="true">&rarr;</i></span>
         </a>
-
         <a class="card reveal" href="students?action=stats">
-          <span class="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9v9H3Z"/></svg>
-          </span>
+          <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9v9H3Z"/></svg></span>
           <h3>Subject statistics</h3>
           <p>Averages, highest and lowest scorers and pass rate for each subject.</p>
           <span class="more">See statistics <i aria-hidden="true">&rarr;</i></span>
         </a>
-
         <a class="card reveal" href="students?action=new">
-          <span class="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-          </span>
+          <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
           <h3>Add student</h3>
           <p>Enter a student with marks for any number of subjects in a single form.</p>
           <span class="more">Add a student <i aria-hidden="true">&rarr;</i></span>
@@ -104,13 +119,28 @@
     </section>
 
     <!-- Steps -->
-    <section class="section" aria-labelledby="howTitle">
+    <section class="section" id="how" aria-labelledby="howTitle">
       <h2 id="howTitle" class="reveal">How it works</h2>
       <ol class="steps">
         <li class="reveal"><span>1</span><h3>Add marks</h3><p>Create a student and enter marks for each subject.</p></li>
         <li class="reveal"><span>2</span><h3>We do the maths</h3><p>Totals, percentages, grades and ranks are calculated instantly.</p></li>
         <li class="reveal"><span>3</span><h3>Read the report</h3><p>Check the class report and subject statistics, or print them.</p></li>
       </ol>
+    </section>
+
+    <!-- Closing call to action -->
+    <section class="section" aria-labelledby="ctaTitle">
+      <div class="cta-band reveal">
+        <h2 id="ctaTitle">Ready to see your class clearly?</h2>
+        <p>Create a free account and add your first student in under a minute.</p>
+        <div class="cta-row center" data-guest>
+          <a class="btn primary" href="auth.html#signup">Create your account</a>
+          <a class="btn ghost" href="auth.html#signin">I already have one</a>
+        </div>
+        <div class="cta-row center" data-user hidden>
+          <a class="btn primary" href="classes" data-dash>Go to dashboard</a>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -120,6 +150,7 @@
       <a href="students">Class report</a>
       <a href="students?action=stats">Subject statistics</a>
       <a href="students?action=new">Add student</a>
+      <a href="auth.html#signin" data-guest>Sign in</a>
     </nav>
   </footer>
 
